@@ -15,12 +15,10 @@ and the functions push! and pop!.
 LinkedList{T} 
 ```
 
-## Alternative `LinkedList` Constructors
+## Outer `LinkedList` Constructors
 
 ```@docs
-LinkedList(::Type{T}) where T
-LinkedList(l::LinkedList{T}) where T
-LinkedList(v::T)  where T
+LinkedList(x::T) where T
 ```
 
 ## Index
