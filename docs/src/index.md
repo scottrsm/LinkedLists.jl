@@ -6,7 +6,8 @@ CurrentModule = LinkedLists
 # Overview
 This module contains the structure for (Single) Linked Lists.
 Additionally, public constructors as well as overloaded functions
-to work with the interator protocol and push! and pop!.
+to work with the iterator protocol, the show method, 
+and the functions push! and pop!.
 
 The `Base::show` function has also been overloaded.
 
