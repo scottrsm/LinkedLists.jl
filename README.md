@@ -1,2 +1,2 @@
 # LinkedLists.jl
-An Julia idiomatic implementation of a (single) Linked List.
+A Julia idiomatic implementation of a (single) Linked List.
