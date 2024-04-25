@@ -65,7 +65,7 @@ effect the other `LinkedList`.
 
 **Note:** If `ys = LinkedList(xs)` where `xs` is a LinkedList, then if one 
 `pop!`'s `xs` to exhaustion, `ys` will have one element. That is, `pop!` will 
-will leave one element left in `ys`.
+leave one element left in `ys`.
 
 # Arguments
 - `l::LinkedList{T}` -- Shared `LinkedList`.
