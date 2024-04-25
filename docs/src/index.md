@@ -19,7 +19,7 @@ and the functions push! and pop!.
   they are subtypes of the abstract type *ILinkedList*.
 - Then a *LinkedList* struct is defined which has a head field that is the internal linked list, *ILinkedList*.
 - We use type stability, the singleton nature of `Nil{T}`, multiple dispatch, and Base operator overloading
-to create a linked list that is performant with minimal code.
+    to create a linked list that is performant with minimal code.
 
 ## Types
 
