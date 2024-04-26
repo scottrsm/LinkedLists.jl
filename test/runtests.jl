@@ -6,7 +6,7 @@ using Test
     @test length(detect_ambiguities(LinkedLists)) == 0
 end
 
-@testset "Push/Pop" begin
+@testset "Push/Pop              " begin
 	xs = LinkedList([10, 20, 30])
 	#push!(xs, 40)
 	#@test pop!(xs) == 40
