@@ -7,7 +7,7 @@ CurrentModule = LinkedLists
 This module contains the structure for (Single) Linked Lists.
 Additionally, public constructors as well as overloaded functions
 to work with the iterator protocol, the show method, 
-and the functions push! and pop!.
+and the functions `push!`, `pop!`, `pushfirst!`, and `popfirst!`.
 
 ## Approach
 - We use an internal linked List, *ILinkedList*, that is Abstract with two subtypes: Cons and Nil.
@@ -20,6 +20,11 @@ and the functions push! and pop!.
 - Then a *LinkedList* struct is defined which has a head field that is the internal linked list, *ILinkedList*.
 - We use type stability, the singleton nature of `Nil{T}`, multiple dispatch, and Base operator overloading
     to create a linked list that is performant with minimal code.
+
+## Performance Notes
+- `pushfirst!` and `popfirst!` are **O(1)** operations (prepend/pop from front).
+- `push!` and `pop!` are **O(n)** operations (append/pop from back) since this is a singly linked list.
+- For best performance, prefer `pushfirst!` / `popfirst!`.
 
 ## Types
 

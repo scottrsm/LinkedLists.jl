@@ -54,26 +54,23 @@ Creates an empty `LinkedList` of type `T`.
 """
 LinkedList(::Type{T}) where {T} = LinkedList{T}(Nil{T}())
 
-# With a given list.
+# Copy constructor -- deep copies the internal list.
 """
 	LinkedList(l::LinkedList{T})
 
-Creates a `LinkedList` which **shares** the internal list of another `LinkedList`.
-
-**Note:** This means that using `push!` or `pop!` on one `LinkedList` will
-effect the other `LinkedList`.
-
-**Note:** If `ys = LinkedList(xs)` where `xs` is a LinkedList, then if one 
-`pop!`'s `xs` to exhaustion, `ys` will have one element. That is, `pop!` will 
-leave one element left in `ys`.
+Creates a new `LinkedList` which is a **deep copy** of another `LinkedList`.
+Mutating the copy will not affect the original.
 
 # Arguments
-- `l::LinkedList{T}` -- Shared `LinkedList`.
+- `l::LinkedList{T}` -- `LinkedList` to copy.
 
 # Return
-- `LinkedList` of type `T`.
+- A new `LinkedList` of type `T`.
 """
-LinkedList(l::LinkedList{T}) where {T} = LinkedList{T}(l.head)
+function LinkedList(l::LinkedList{T}) where {T}
+    vs = collect(l)
+    return isempty(vs) ? LinkedList(T) : LinkedList(vs)
+end
 
 # A single value
 """
@@ -109,35 +106,43 @@ function LinkedList(vs::Vector{T}) where {T}
         return LinkedList(T)
     end
 
-    vss = sort(vs, rev=true)
-    il  = Cons{T}(vss[1])
-    for i in 2:n
-        il = Cons{T}(vss[i], il)
+    il = Cons{T}(vs[n])
+    for i in (n-1):-1:1
+        il = Cons{T}(vs[i], il)
     end
 
     return LinkedList{T}(il)
 end
 
-# Need a way to get the "state" for "Cons" and "Nil" -- used for the implementation
-# of the "iterate" protocol of LinkedList.
-getIState(i::ILinkedList{T}) where {T} = nothing
-getIState(i::Cons{T}) where {T} = (i.val, i.next)
+# Internal helper for the "iterate" protocol.
+_istate(::ILinkedList) = nothing
+_istate(i::Cons) = (i.val, i.next)
 
 # Implement the "iterate" protocol: How to go from one state to the next.
-Base.iterate(l::LinkedList{T}) where {T} = getIState(l.head)
-Base.iterate(l::LinkedList{T}, s::ILinkedList{T}) where {T} = nothing
-Base.iterate(l::LinkedList{T}, s::Cons{T}) where {T} = (s.val, s.next)
+Base.iterate(l::LinkedList) = _istate(l.head)
+Base.iterate(::LinkedList, ::ILinkedList) = nothing
+Base.iterate(::LinkedList, s::Cons) = (s.val, s.next)
 
 # Implement the "iterate" protocol: Julia needs to know a "size" of a container.
-Base.IteratorSize(i::LinkedList{T}) where {T} = Base.SizeUnknown()
+Base.IteratorSize(::Type{<:LinkedList}) = Base.SizeUnknown()
+Base.eltype(::Type{LinkedList{T}}) where {T} = T
+
+# Collection query methods.
+Base.isempty(l::LinkedList) = l.head isa Nil
+
+function Base.length(l::LinkedList)
+    n = 0
+    for _ in l
+        n += 1
+    end
+    return n
+end
 
 
 function Base.show(io::IO, l::LinkedList{T}) where {T}
-    print(io, "LinkedList{" * string(T) * "}")
+    print(io, "LinkedList{$T}")
 
-    # We can compare against Nil{T} as it is a
-	# Singleton for its "class" (LinkedList) as long as NIL{T} (<: ILinkedList{T}) is *NOT* mutable.
-    if l.head == Nil{T}()
+    if isempty(l)
         print(io, "--(Empty)")
     else
 		for (x,i) in zip(l, 1:21)
@@ -151,33 +156,42 @@ function Base.show(io::IO, l::LinkedList{T}) where {T}
     println(io, "")
 end
 
-function Base.push!(l::LinkedList{T}, v::T) where {T}
-    cur = l.head
+# O(1) prepend.
+function Base.pushfirst!(l::LinkedList{T}, v::T) where {T}
+    l.head = Cons(v, l.head)
+    return l
+end
 
-    if cur == Nil{T}()
+# O(1) pop from front.
+function Base.popfirst!(l::LinkedList{T}) where {T}
+    isempty(l) && throw(ArgumentError("list must be non-empty"))
+    val = l.head.val
+    l.head = l.head.next
+    return val
+end
+
+# O(n) append.
+function Base.push!(l::LinkedList{T}, v::T) where {T}
+    if isempty(l)
         l.head = Cons(v)
-        return nothing
+        return l
     end
 
+    cur = l.head
     while cur.next != Nil{T}()
         cur = cur.next
     end
 
     cur.next = Cons(v)
-    return nothing
+    return l
 end
 
-
-# Implement pop! for LinkedList{T}.
+# O(n) pop from back.
 function Base.pop!(l::LinkedList{T}) where {T}
-    cur  = l.head
-    last = l.head
-    end_link = Nil{T}()
+    isempty(l) && throw(ArgumentError("list must be non-empty"))
 
-    # If we are pointing to Nil, return nothing.
-    if l.head == end_link
-        return nothing
-    end
+    cur  = l.head
+    end_link = Nil{T}()
 
     # If list contains just one element.
     if cur.next == end_link
@@ -186,6 +200,7 @@ function Base.pop!(l::LinkedList{T}) where {T}
     end
 
     # Otherwise, get to the last item.
+    last = cur
     while cur.next != end_link
         last = cur
         cur  = cur.next
@@ -194,7 +209,7 @@ function Base.pop!(l::LinkedList{T}) where {T}
     # Point the second-to-last element's next field to Nil.
     last.next = end_link
 
-    # Return the value of the last link (what was the last link).
+    # Return the value of the last link.
     return cur.val
 end
 
